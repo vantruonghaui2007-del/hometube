@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 40
     env:
-      HOMETUBE_KEYSTORE: ${{ runner.temp }}/hometube.jks
+      HOMETUBE_KEYSTORE: /tmp/hometube-${{ github.run_id }}-${{ github.run_attempt }}.jks
       HOMETUBE_KEYSTORE_PASSWORD: ${{ secrets.HOMETUBE_KEYSTORE_PASSWORD }}
       HOMETUBE_KEY_ALIAS: ${{ secrets.HOMETUBE_KEY_ALIAS }}
       HOMETUBE_KEY_PASSWORD: ${{ secrets.HOMETUBE_KEY_PASSWORD }}
