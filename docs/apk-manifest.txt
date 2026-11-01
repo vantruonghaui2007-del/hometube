@@ -1,0 +1,5 @@
+package: name='vn.hometube.app' versionCode='1' versionName='1.0.0' platformBuildVersionName='14' platformBuildVersionCode='34' compileSdkVersion='34' compileSdkVersionCodename='14'
+sdkVersion:'19'
+targetSdkVersion:'28'
+application-label:'HomeTube'
+launchable-activity: name='vn.hometube.app.ui.HomeActivity'  label='' icon=''

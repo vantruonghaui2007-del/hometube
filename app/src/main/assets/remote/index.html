@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0D1015">
+<title>HomeKara – Chọn bài</title>
+<style>
+  :root { --bg:#0D1015; --s1:#171B22; --s2:#222833; --line:#343B48; --tx:#F2F4F7; --mu:#A3ACB9; --ac:#FFB547; --acTx:#1A1204; --neg:#5FB3FF; --ok:#8FE3B0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--tx); font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  body { display: flex; flex-direction: column; min-height: 100vh; }
+  header { padding: 14px 16px 10px; position: sticky; top: 0; background: var(--bg); z-index: 2; }
+  .row { display: flex; gap: 8px; align-items: center; }
+  .logo { width: 34px; height: 34px; border-radius: 9px; background: var(--ac); display: grid; place-items: center; flex: none; }
+  h1 { margin: 0; font-size: 18px; }
+  .status { font-size: 12px; color: var(--ok); }
+  .status.off { color: #FF9E9E; }
+  button { font: inherit; color: inherit; cursor: pointer; border: 0; border-radius: 12px; background: var(--s2); min-height: 44px; padding: 0 14px; font-weight: 600; }
+  button.pri { background: var(--ac); color: var(--acTx); }
+  button.ghost { background: transparent; border: 1px solid var(--line); }
+  input { font: inherit; color: var(--tx); background: var(--s1); border: 2px solid var(--line); border-radius: 12px; height: 46px; padding: 0 14px; width: 100%; min-width: 0; }
+  input:focus { outline: none; border-color: var(--ac); }
+  .chips { display: flex; gap: 6px; overflow-x: auto; padding: 8px 0 2px; }
+  .chip { flex: none; min-height: 34px; border-radius: 999px; padding: 0 12px; font-size: 14px; background: transparent; border: 1px solid var(--line); }
+  .chip.on { background: var(--ac); color: var(--acTx); border-color: var(--ac); }
+  .sugg { display: flex; gap: 6px; flex-wrap: wrap; padding-top: 6px; }
+  .sugg button { min-height: 32px; font-size: 13px; font-weight: 500; background: var(--s1); }
+  main { flex: 1; padding: 0 16px 230px; display: flex; flex-direction: column; gap: 10px; }
+  .qtoggle { width: 100%; justify-content: space-between; display: flex; align-items: center; background: var(--s1); }
+  .qitem, .song { display: flex; gap: 10px; align-items: center; padding: 10px; border-radius: 12px; background: var(--s1); }
+  .qitem { background: #1C212A; font-size: 14px; padding: 8px 12px; }
+  .qitem .n { color: var(--ac); font-weight: 700; width: 18px; }
+  .grow { flex: 1; min-width: 0; }
+  .ell { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mu { color: var(--mu); font-size: 13px; }
+  .thumb { width: 96px; height: 54px; border-radius: 8px; background: var(--s2) center/cover no-repeat; position: relative; flex: none; }
+  .thumb span { position: absolute; right: 3px; bottom: 3px; background: rgba(0,0,0,.75); padding: 0 4px; border-radius: 3px; font-size: 11px; }
+  .title { font-size: 14px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .tags { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
+  .tag { font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: 4px; background: #2A303B; }
+  .acts { display: flex; flex-direction: column; gap: 6px; flex: none; }
+  .acts button { min-height: 40px; font-size: 13px; padding: 0 10px; }
+  footer { position: fixed; left: 0; right: 0; bottom: 0; background: var(--s1); border-top: 1px solid #2A303B; padding: 12px 16px calc(14px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 10px; }
+  .np { font-size: 14px; font-weight: 600; }
+  .np small { color: var(--ok); font-size: 11px; font-weight: 700; margin-right: 6px; }
+  .tone { flex: 1; height: 48px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--s2); }
+  .tone b { font-size: 20px; line-height: 1; }
+  .tone small { font-size: 11px; font-weight: 600; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; }
+  .big { width: 56px; height: 48px; font-size: 24px; padding: 0; }
+  #toast { position: fixed; left: 16px; right: 16px; bottom: 220px; background: var(--tx); color: var(--bg); padding: 12px 16px; border-radius: 12px; font-weight: 600; text-align: center; display: none; z-index: 5; }
+  .empty { color: var(--mu); text-align: center; padding: 30px 0; }
+  dialog { background: var(--s1); color: var(--tx); border: 0; border-radius: 16px; padding: 20px; width: min(92vw, 360px); }
+  dialog::backdrop { background: rgba(0,0,0,.6); }
+</style>
+</head>
+<body>
+<header>
+  <div class="row">
+    <div class="logo" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1204" stroke-width="2.4" stroke-linecap="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v5"/></svg></div>
+    <div class="grow"><h1>HomeKara</h1><div id="status" class="status">● Đang kết nối với TV…</div></div>
+    <button id="nameBtn" class="ghost" aria-label="Đổi tên người hát">Tên ✎</button>
+  </div>
+  <form id="searchForm" class="row" style="margin-top:10px">
+    <label for="q" style="position:absolute;left:-9999px">Tìm bài hát</label>
+    <input id="q" type="search" placeholder="Tìm bài hát (gõ có dấu được)" autocomplete="off" enterkeyhint="search">
+    <button class="pri" type="submit">Tìm</button>
+  </form>
+  <div id="sugg" class="sugg"></div>
+  <div id="filters" class="chips"></div>
+</header>
+
+<main>
+  <button id="qToggle" class="qtoggle" type="button"><span id="qTitle">Hàng chờ · 0 bài</span><span class="mu" id="qArrow">Xem ▾</span></button>
+  <div id="queue" style="display:none; flex-direction:column; gap:6px"></div>
+  <div id="resultsInfo" class="mu"></div>
+  <div id="results" style="display:flex; flex-direction:column; gap:10px"></div>
+</main>
+
+<footer>
+  <div class="np ell" id="np"><small>CHƯA HÁT</small>Hãy chọn một bài</div>
+  <div class="row">
+    <button class="big" data-act="TONE_DOWN" aria-label="Giảm tone">−</button>
+    <div class="tone" id="toneBox"><small>TONE</small><b id="toneVal">0</b></div>
+    <button class="big" data-act="TONE_UP" aria-label="Tăng tone">+</button>
+  </div>
+  <div class="grid3">
+    <button data-act="TOGGLE_PAUSE" id="pauseBtn">❚❚ Dừng</button>
+    <button data-act="NEXT_SONG" id="skipBtn">Bỏ qua bài</button>
+    <button data-act="TOGGLE_VOCAL_CUT" id="vocalBtn">Tắt lời</button>
+  </div>
+</footer>
+
+<div id="toast" role="status"></div>
+
+<dialog id="nameDlg">
+  <form method="dialog">
+    <label for="nameInput" style="display:block;margin-bottom:8px;font-weight:600">Tên của bạn (hiện trên TV)</label>
+    <input id="nameInput" maxlength="20" placeholder="Ví dụ: Lan">
+    <div class="row" style="margin-top:14px;justify-content:flex-end">
+      <button value="cancel" class="ghost">Huỷ</button>
+      <button value="ok" class="pri">Lưu</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+(function () {
+  var FILTERS = [["ALL","Tất cả"],["BEAT","Beat"],["MALE","Tone Nam"],["FEMALE","Tone Nữ"],["DUET","Song ca"]];
+  var filter = "ALL", lastQuery = "", queueOpen = false, skipArmed = 0;
+  var $ = function (id) { return document.getElementById(id); };
+
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+  var name = store("hk_name") || "";
+
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; }); }
+  function fmt(sec) { sec = sec | 0; return sec > 0 ? (Math.floor(sec / 60) + ":" + ("0" + sec % 60).slice(-2)) : ""; }
+  function toneText(t) { return t > 0 ? "+" + t : (t < 0 ? "−" + (-t) : "0"); }
+
+  var toastTimer;
+  function toast(msg) { var t = $("toast"); t.textContent = msg; t.style.display = "block"; clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.style.display = "none"; }, 2200); }
+
+  function api(method, path, body) {
+    var opt = { method: method, headers: {} };
+    if (body) { opt.headers["Content-Type"] = "application/json; charset=utf-8"; opt.body = JSON.stringify(body); }
+    return fetch(path, opt).then(function (r) { return r.json().then(function (j) { return { status: r.status, data: j }; }); });
+  }
+
+  function renderName() { $("nameBtn").textContent = (name || "Tên") + " ✎"; }
+  function askName() { $("nameInput").value = name; if ($("nameDlg").showModal) $("nameDlg").showModal(); else { var n = prompt("Tên của bạn", name); if (n != null) { name = n.trim().slice(0, 20); store("hk_name", name); renderName(); } } }
+  $("nameDlg").addEventListener("close", function () { if ($("nameDlg").returnValue === "ok") { name = $("nameInput").value.trim().slice(0, 20); store("hk_name", name); renderName(); } });
+  $("nameBtn").onclick = askName;
+
+  function renderFilters() {
+    $("filters").innerHTML = "";
+    FILTERS.forEach(function (f) {
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "chip" + (filter === f[0] ? " on" : ""); b.textContent = f[1];
+      b.onclick = function () { filter = f[0]; renderFilters(); if (lastQuery) search(lastQuery); };
+      $("filters").appendChild(b);
+    });
+  }
+
+  function songRow(s) {
+    var d = document.createElement("div"); d.className = "song";
+    var tags = (s.tags || []).map(function (t) { return '<span class="tag">' + esc(t) + '</span>'; }).join("");
+    d.innerHTML = '<div class="thumb" style="background-image:url(\'' + esc(s.thumbnailUrl) + '\')"><span>' + fmt(s.durationSec) + '</span></div>' +
+      '<div class="grow"><div class="title">' + esc(s.title) + '</div><div class="mu ell">' + esc(s.channel) + '</div><div class="tags">' + tags + '</div></div>' +
+      '<div class="acts"><button class="pri" type="button">+ Thêm</button><button class="ghost" type="button">Ưu tiên</button></div>';
+    var btns = d.querySelectorAll("button");
+    btns[0].onclick = function () { add(s, false); };
+    btns[1].onclick = function () { add(s, true); };
+    return d;
+  }
+
+  function search(q) {
+    clearTimeout(suggTimer); lastQuery = q; $("sugg").innerHTML = "";
+    $("resultsInfo").textContent = "Đang tìm “" + q + "”…"; $("results").innerHTML = "";
+    api("GET", "/api/search?q=" + encodeURIComponent(q) + "&filter=" + filter).then(function (r) {
+      var list = r.data || [];
+      $("resultsInfo").textContent = list.length ? ("Kết quả cho “" + q + " karaoke”") : "";
+      if (!list.length) { $("results").innerHTML = '<div class="empty">Không thấy bài nào. Thử tên khác hoặc bộ lọc “Tất cả”.</div>'; return; }
+      list.forEach(function (s) { $("results").appendChild(songRow(s)); });
+    }).catch(function () { $("resultsInfo").textContent = "Không tìm được — kiểm tra kết nối với TV."; });
+  }
+
+  function add(s, priority) {
+    if (!name) { askName(); return; }
+    api("POST", "/api/queue", { videoId: s.videoId, title: s.title, channel: s.channel, durationSec: s.durationSec, thumbnailUrl: s.thumbnailUrl, by: name, priority: priority })
+      .then(function (r) {
+        if (r.status === 409) toast("Bài đã có trong danh sách");
+        else toast(priority ? "Đã ưu tiên — hát ngay sau bài này" : ("Đã thêm — vị trí số " + r.data.position));
+        refresh();
+      }).catch(function () { toast("Không gửi được tới TV"); });
+  }
+
+  var suggTimer;
+  $("q").addEventListener("input", function () {
+    clearTimeout(suggTimer); var v = $("q").value.trim();
+    if (!v) { $("sugg").innerHTML = ""; return; }
+    suggTimer = setTimeout(function () {
+      api("GET", "/api/suggest?q=" + encodeURIComponent(v)).then(function (r) {
+        $("sugg").innerHTML = "";
+        (r.data || []).slice(0, 6).forEach(function (x) {
+          var b = document.createElement("button"); b.type = "button"; b.textContent = x;
+          b.onclick = function () { $("q").value = x; search(x); };
+          $("sugg").appendChild(b);
+        });
+      }).catch(function () {});
+    }, 350);
+  });
+  $("searchForm").addEventListener("submit", function (e) { e.preventDefault(); clearTimeout(suggTimer); $("sugg").innerHTML = ""; var v = $("q").value.trim(); if (v) { $("q").blur(); search(v); } });
+
+  $("qToggle").onclick = function () { queueOpen = !queueOpen; $("queue").style.display = queueOpen ? "flex" : "none"; $("qArrow").textContent = queueOpen ? "Thu gọn ▴" : "Xem ▾"; };
+
+  function renderState(st) {
+    $("status").textContent = "● Đã kết nối với TV"; $("status").className = "status";
+    var q = st.queue || [];
+    $("qTitle").textContent = "Hàng chờ · " + q.length + " bài";
+    $("queue").innerHTML = q.length ? "" : '<div class="mu" style="padding:6px 4px">Chưa có bài nào trong hàng chờ.</div>';
+    q.forEach(function (s, i) {
+      var d = document.createElement("div"); d.className = "qitem";
+      d.innerHTML = '<span class="n">' + (i + 1) + '</span><span class="grow ell">' + esc(s.title) + '</span><span class="mu">' + esc(s.by) + '</span>';
+      if (s.by === name) {
+        var x = document.createElement("button"); x.className = "ghost"; x.type = "button"; x.textContent = "Xoá"; x.style.minHeight = "34px";
+        x.onclick = function () { api("DELETE", "/api/queue/" + s.videoId).then(refresh); };
+        d.appendChild(x);
+      }
+      $("queue").appendChild(d);
+    });
+    if (st.playing) {
+      $("np").innerHTML = "<small>ĐANG HÁT</small>" + esc(st.song.title) + ' <span class="mu">· ' + esc(st.by) + "</span>";
+      var t = st.semitones | 0; $("toneVal").textContent = toneText(t);
+      $("toneBox").style.background = t > 0 ? "var(--ac)" : (t < 0 ? "var(--neg)" : "var(--s2)");
+      $("toneBox").style.color = t !== 0 ? "#10131A" : "var(--tx)";
+      $("pauseBtn").textContent = st.paused ? "▶ Tiếp tục" : "❚❚ Dừng";
+      $("vocalBtn").style.background = st.vocalCut ? "var(--ok)" : ""; $("vocalBtn").style.color = st.vocalCut ? "#06210F" : "";
+    } else {
+      $("np").innerHTML = "<small>CHƯA HÁT</small>Hãy chọn một bài"; $("toneVal").textContent = "0"; $("toneBox").style.background = ""; $("toneBox").style.color = "";
+    }
+  }
+
+  function refresh() {
+    return api("GET", "/api/state").then(function (r) { renderState(r.data); })
+      .catch(function () { $("status").textContent = "● Mất kết nối với TV"; $("status").className = "status off"; });
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll("[data-act]"), function (b) {
+    b.onclick = function () {
+      var act = b.getAttribute("data-act");
+      if (act === "NEXT_SONG" && Date.now() - skipArmed > 3000) { skipArmed = Date.now(); toast("Bấm “Bỏ qua bài” lần nữa để xác nhận"); return; }
+      skipArmed = 0;
+      api("POST", "/api/control", { action: act }).then(function (r) {
+        if (r.status === 409) toast("Chưa có bài nào đang hát"); else renderState(r.data);
+      }).catch(function () { toast("Không gửi được tới TV"); });
+    };
+  });
+
+  renderName(); renderFilters(); refresh(); setInterval(refresh, 3000);
+  if (!name) setTimeout(askName, 400);
+})();
+</script>
+</body>
+</html>
